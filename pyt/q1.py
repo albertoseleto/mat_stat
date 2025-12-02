@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import sounddevice as sd
 import scipy.io.wavfile
 from scipy import signal as sig
+
 def load_mat_simple(path):
     """Simple loader for classic MATLAB .mat files (v7 and earlier)."""
     from scipy.io import loadmat
@@ -21,7 +22,6 @@ def extract_data(data):
 
     print(useful_data)
 
-    # Use .item() to extract the scalar value from the 0-d array
     x = useful_data['x'].item()
     dt = useful_data['dt'].item()
 
@@ -95,13 +95,12 @@ def filter_signal(signal_data, dt, cutoff_freq, btype='lowpass', order=4):
 
 
 if __name__ == "__main__":
-    # 1. Define the path to your .mat file here
-    file_cello = "cello.mat"  # <-- CHANGE THIS
+
+    file_cello = "cello.mat"
 
     file_trombone = "trombone.mat"
 
 
-    # 2. Load the data
     data_cello = load_mat_simple(file_cello)
 
     data_trombone = load_mat_simple(file_trombone)
