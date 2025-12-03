@@ -35,22 +35,44 @@ def extract_data(data):
 
 
 # Question 1.2
-def plot_spectrum(freq, psd):
+def plot_spectrum(freq, psd, freq_filtered, psd_filtered):
     """Plot the power spectral density against frequency."""
     plt.figure(figsize=(12, 4))
 
-    plt.subplot(1, 2, 1)
+    plt.style()
+
+    plt.subplot(2, 2, 1)
     plt.plot(freq, psd)
     plt.xlabel("Frequency")
     plt.ylabel("Power spectral density")
     plt.title("Frequency vs Power Spectral Density")
+    plt.xlim(-50, 2000)
+    
 
-    plt.subplot(1, 2, 2)
+    plt.subplot(2, 2, 2)
     plt.plot(freq, psd)
-    plt.xscale("log")
+    plt.yscale("log")
     plt.xlabel("Frequency")
     plt.ylabel("Power spectral density")
     plt.title("Frequency vs Power Spectral Density (Log Scale)")
+    plt.xlim(-50, 2000)
+    plt.ylim(1e-12, 100)
+
+    plt.subplot(2, 2, 3)
+    plt.plot(freq_filtered, psd_filtered)
+    plt.xlabel("Frequency filtered")
+    plt.ylabel("Power spectral density")
+    plt.title("Frequency filtered vs Power Spectral Density")
+    plt.xlim(-50, 2000)
+
+    plt.subplot(2, 2, 4)
+    plt.plot(freq_filtered, psd_filtered)
+    plt.yscale("log")
+    plt.xlabel("Frequency filtered")
+    plt.ylabel("Power spectral density (Log Scale)")
+    plt.title("Frequency filtered vs Power Spectral Density (Log Scale)")
+    plt.xlim(-50, 2000)
+    plt.ylim(1e-12, 100)
     plt.show()
 
 
@@ -124,12 +146,17 @@ if __name__ == "__main__":
 
     calc_keynote_f(freq_cello, psd_cello)
     calc_keynote_f(freq_trombone, psd_trombone)
-    plot_spectrum(freq_trombone, psd_trombone)
-    plot_spectrum(freq_cello, psd_cello)
+    #plot_spectrum(freq_trombone, psd_trombone)
+    #plot_spectrum(freq_cello, psd_cello)
 
     # save_as_wav("trombone_output.wav", trombone, dt_trombone)
 
-    cello_filtered = filter_signal(cello, dt_cello, cutoff_freq=1500, btype="lowpass")
+    cello_filtered = filter_signal(cello, dt_cello, cutoff_freq=50, btype="highpass")
     psd_cello_filtered, freq_cello_filtered = pxx(cello_filtered, dt_cello)
 
-    plot_spectrum(freq_cello_filtered, psd_cello_filtered)
+    plot_spectrum(freq_cello, psd_cello, freq_cello_filtered, psd_cello_filtered)
+
+    trombone_filtered = filter_signal(trombone, dt_trombone, cutoff_freq=50, btype="highpass")
+    psd_trmbone_filtered, freq_trombone_filtered = pxx(trombone_filtered, dt_trombone)
+    plot_spectrum(freq_trombone, psd_trombone, freq_trombone_filtered, psd_trmbone_filtered)
+
