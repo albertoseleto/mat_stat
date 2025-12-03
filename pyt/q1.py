@@ -37,9 +37,9 @@ def extract_data(data):
 # Question 1.2
 def plot_spectrum(freq, psd, freq_filtered, psd_filtered):
     """Plot the power spectral density against frequency."""
+    plt.style.use('ggplot')
     plt.figure(figsize=(12, 4))
 
-    plt.style()
 
     plt.subplot(2, 2, 1)
     plt.plot(freq, psd)
