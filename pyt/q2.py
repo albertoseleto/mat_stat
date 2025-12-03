@@ -5,6 +5,9 @@ import scipy
 from acf import acf
 from scipy import signal as sig
 
+from filterpy.kalman import KalmanFilter
+
+
 # from kalman import kalman
 
 
@@ -27,16 +30,51 @@ def extract_data(data):
     return Atrue, svedala_rec
 
 
-def plot_series(data, covariance):
-    plt.figure(figsize=(12, 6))
+def plot_series(data, filtered_data, covariance):
+    plt.style.use('ggplot')
+    plt.figure(figsize=(12, 4))
+
+
+    plt.subplot(2, 2, 1)
+
     plt.plot(data, label="Time Series Data", color="blue", alpha=0.7)
-    plt.plot(covariance, label="Covariance (ACF)", color="red", linestyle="--")
-    plt.title("Time Series Data and its Autocorrelation")
     plt.xlabel("Sample / Lag")
     plt.ylabel("Value")
     plt.legend()
     plt.grid(True)
+
+    plt.subplot(2, 2, 2)
+
+    plt.plot(covariance, label="Covariance (ACF)", color="red", linestyle="--")
+    plt.legend()
+    plt.grid(True)
+
+    plt.subplot(2, 2, 3)
+
+    plt.plot(filtered_data, label="FilteredTime Series Data", color="blue", alpha=0.7)
+    plt.xlabel("Sample / Lag")
+    plt.ylabel("Value")
+    plt.legend()
+    plt.grid(True)
+
+
     plt.show()
+
+def apply_seasonal_filter(data, s):
+    """
+    Applies a filter to remove a seasonal component of period s.
+    Equivalent to MATLAB's: filter([1 zeros(1,s-1) -1], 1, data)
+    """
+    # b coefficients: [1, 0, 0, ..., -1]
+    b = np.zeros(s + 1)
+    b[0] = 1
+    b[s] = -1
+    
+    # a coefficient
+    a = [1]
+    
+    # Apply the linear filter
+    return sig.lfilter(b, a, data)
 
 
 if __name__ == "__main__":
@@ -46,8 +84,18 @@ if __name__ == "__main__":
 
     Atrue, svedala_rec = extract_data(data)
 
-    ACFed = acf(svedala_rec, 1000)
+    ACFed = acf(svedala_rec, 690)
+    # confidence interval bounds sigma somethng
+
+    
+
+
     print(len(svedala_rec))
     print(len(ACFed))
 
-    plot_series(svedala_rec, ACFed)
+
+    filtered_svedala = apply_seasonal_filter(svedala_rec, 24)
+
+    ACFed = acf(filtered_svedala, 690)
+
+    plot_series(svedala_rec,filtered_svedala, ACFed)
