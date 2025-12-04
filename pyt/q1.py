@@ -4,8 +4,9 @@ import pandas as pd
 import scipy
 import scipy.io.wavfile
 import sounddevice as sd
-from pxx import pxx
 from scipy import signal as sig
+
+from pxx import pxx
 
 
 def load_mat_simple(path):
@@ -37,42 +38,50 @@ def extract_data(data):
 # Question 1.2
 def plot_spectrum(freq, psd, freq_filtered, psd_filtered):
     """Plot the power spectral density against frequency."""
-    plt.style.use('ggplot')
-    plt.figure(figsize=(12, 4))
+    plt.style.use("ggplot")
 
+    # Bigger figure but with more spacing between subplots
+    fig, axes = plt.subplots(2, 2, figsize=(12, 5))
 
-    plt.subplot(2, 2, 1)
-    plt.plot(freq, psd)
-    plt.xlabel("Frequency")
-    plt.ylabel("Power spectral density")
-    plt.title("Frequency vs Power Spectral Density")
-    plt.xlim(-50, 2000)
-    
+    # Top-left: original, linear scale
+    ax = axes[0, 0]
+    ax.plot(freq, psd)
+    ax.set_xlabel("Frequency", fontsize=9)
+    ax.set_ylabel("Power spectral density", fontsize=9)
+    ax.set_title("Frequency vs Power Spectral Density", fontsize=11)
+    ax.set_xlim(-50, 2000)
 
-    plt.subplot(2, 2, 2)
-    plt.plot(freq, psd)
-    plt.yscale("log")
-    plt.xlabel("Frequency")
-    plt.ylabel("Power spectral density")
-    plt.title("Frequency vs Power Spectral Density (Log Scale)")
-    plt.xlim(-50, 2000)
-    plt.ylim(1e-12, 100)
+    # Top-right: original, log scale
+    ax = axes[0, 1]
+    ax.plot(freq, psd)
+    ax.set_yscale("log")
+    ax.set_xlabel("Frequency", fontsize=9)
+    ax.set_ylabel("Power spectral density", fontsize=9)
+    ax.set_title("Frequency vs Power Spectral Density (Log Scale)", fontsize=11)
+    ax.set_xlim(-50, 2000)
+    ax.set_ylim(1e-12, 100)
 
-    plt.subplot(2, 2, 3)
-    plt.plot(freq_filtered, psd_filtered)
-    plt.xlabel("Frequency filtered")
-    plt.ylabel("Power spectral density")
-    plt.title("Frequency filtered vs Power Spectral Density")
-    plt.xlim(-50, 2000)
+    # Bottom-left: filtered, linear scale
+    ax = axes[1, 0]
+    ax.plot(freq_filtered, psd_filtered)
+    ax.set_xlabel("Filtered frequency", fontsize=9)
+    ax.set_ylabel("Power spectral density", fontsize=9)
+    ax.set_title("Filtered vs Power Spectral Density", fontsize=11)
+    ax.set_xlim(-50, 2000)
 
-    plt.subplot(2, 2, 4)
-    plt.plot(freq_filtered, psd_filtered)
-    plt.yscale("log")
-    plt.xlabel("Frequency filtered")
-    plt.ylabel("Power spectral density (Log Scale)")
-    plt.title("Frequency filtered vs Power Spectral Density (Log Scale)")
-    plt.xlim(-50, 2000)
-    plt.ylim(1e-12, 100)
+    # Bottom-right: filtered, log scale
+    ax = axes[1, 1]
+    ax.plot(freq_filtered, psd_filtered)
+    ax.set_yscale("log")
+    ax.set_xlabel("Filtered frequency", fontsize=9)
+    ax.set_ylabel("Power spectral density (log scale)", fontsize=9)
+    ax.set_title("Filtered vs Power Spectral Density (Log Scale)", fontsize=11)
+    ax.set_xlim(-50, 2000)
+    ax.set_ylim(1e-12, 100)
+
+    # Extra spacing between subplots
+    fig.tight_layout(pad=3.0, w_pad=3.0, h_pad=3.0)
+
     plt.show()
 
 
@@ -146,8 +155,8 @@ if __name__ == "__main__":
 
     calc_keynote_f(freq_cello, psd_cello)
     calc_keynote_f(freq_trombone, psd_trombone)
-    #plot_spectrum(freq_trombone, psd_trombone)
-    #plot_spectrum(freq_cello, psd_cello)
+    # plot_spectrum(freq_trombone, psd_trombone)
+    # plot_spectrum(freq_cello, psd_cello)
 
     # save_as_wav("trombone_output.wav", trombone, dt_trombone)
 
@@ -156,7 +165,10 @@ if __name__ == "__main__":
 
     plot_spectrum(freq_cello, psd_cello, freq_cello_filtered, psd_cello_filtered)
 
-    trombone_filtered = filter_signal(trombone, dt_trombone, cutoff_freq=50, btype="highpass")
+    trombone_filtered = filter_signal(
+        trombone, dt_trombone, cutoff_freq=50, btype="highpass"
+    )
     psd_trmbone_filtered, freq_trombone_filtered = pxx(trombone_filtered, dt_trombone)
-    plot_spectrum(freq_trombone, psd_trombone, freq_trombone_filtered, psd_trmbone_filtered)
-
+    plot_spectrum(
+        freq_trombone, psd_trombone, freq_trombone_filtered, psd_trmbone_filtered
+    )
