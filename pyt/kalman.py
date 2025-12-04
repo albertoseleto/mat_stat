@@ -1,9 +1,10 @@
 import numpy as np
-def kalman(series, ):
+def kalman(series):
     # N = length(??)
+    y = np.asarray(series)
     N = len(series)
 
-    se2 = 10 # estimate  / measure      # measurement noise variance 2x2 shaped?
+    se2 = 1e-3 # estimate  / measure      # measurement noise variance 2x2 shaped?
     sf2 = 0.6 # how much the model will change, estimate it      # state noise variance
 
     # Xtt = zeros(??, N)
@@ -18,7 +19,7 @@ def kalman(series, ):
     Xtt[:, :lag] = np.tile(np.array([0.0, 0.0]).reshape(-1, 1), (1, lag))
 
     # VXXtt = diag([??])
-    VXXtt = np.diag([??])  # initial covariance matrix
+    VXXtt = np.diag([1,1])  # initial covariance matrix
 
     # A = eye(??)
     A = np.eye(2)
@@ -26,7 +27,7 @@ def kalman(series, ):
 
     for k in range(lag, N):
         # C = [??]
-        C = np.array([??]).reshape(1, -1)
+        C = np.array([-y[k-1], -y[k-2]]).reshape(1, -1)
 
         # ---------- PREDICTION ----------
         # Xtt1 = A * Xtt(:,k-1)
@@ -49,7 +50,7 @@ def kalman(series, ):
         Kt = CXYtt1 / VYYtt1[k]
 
         # Xtt(:,k) = Xtt1 + Kt * (y(k) - Ytt1(k))
-        Xtt[:, k] = Xtt1 + Kt.flatten() * (??[k] - Ytt1[k])
+        Xtt[:, k] = Xtt1 + Kt.flatten() * (y[k] - Ytt1[k])
 
         # VXXtt = VXXtt1 - Kt * C * VXXtt1
         VXXtt = VXXtt1 - Kt @ C @ VXXtt1
