@@ -6,6 +6,7 @@ from acf import acf
 from scipy import signal as sig
 
 from filterpy.kalman import KalmanFilter
+from kalman import kalman
 
 
 # from kalman import kalman
@@ -59,6 +60,43 @@ def plot_series(data, filtered_data, covariance):
 
 
     plt.show()
+    
+def plot_kalman_results(Xtt, Atrue, ft_hat):
+    N = Xtt.shape[1]
+    t = np.arange(N)
+    plt.figure(figsize=(12, 8))
+
+    # Plot a1
+    plt.subplot(2, 1, 1)
+    plt.plot(t, Xtt[0, :], 'b', label='Estimated a1', linewidth=1.2)
+    plt.plot(t, Atrue[:, 0], 'r--', label='True a1', linewidth=1.2)
+    plt.xlabel('Time (hours)')
+    plt.ylabel('a1(t)')
+    plt.legend()
+    plt.title('Comparison of a1(t)')
+    plt.grid(True)
+
+    # Plot a2
+    plt.subplot(2, 1, 2)
+    plt.plot(t, Xtt[1, :], 'b', label='Estimated a2', linewidth=1.2)
+    plt.plot(t, Atrue[:, 1], 'r--', label='True a2', linewidth=1.2)
+    plt.xlabel('Time (hours)')
+    plt.ylabel('a2(t)')
+    plt.legend()
+    plt.title('Comparison of a2(t)')
+    plt.grid(True)
+
+    plt.tight_layout()
+    plt.show()
+
+    # Plot residuals
+    plt.figure(figsize=(10, 4))
+    plt.plot(np.arange(len(ft_hat)), ft_hat)
+    plt.xlabel('Time (hours)')
+    plt.ylabel('Residuals')
+    plt.title('Estimated residuals')
+    plt.grid(True)
+    plt.show()
 
 def apply_seasonal_filter(data, s):
     """
@@ -99,3 +137,6 @@ if __name__ == "__main__":
     ACFed = acf(filtered_svedala, 690)
 
     plot_series(svedala_rec,filtered_svedala, ACFed)
+
+    Xtt, Ytt1, ft_hat = kalman(filtered_svedala)
+    plot_kalman_results(Xtt, Atrue, ft_hat)
