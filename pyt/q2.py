@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy.stats as stats
 from scipy import signal as sig
 
 from acf import acf
 from kalman import kalman
-import scipy.stats as stats
 
 
 def load_mat_simple(path):
@@ -71,6 +71,29 @@ def plot_q21(original, filtered, acf_raw, acf_filt):
     ax.axhline(0, color="grey", linewidth=0.8)
     ax.grid(True)
 
+    # Confidence interval (dashed lines) from `acf.py` styling
+    signLvl = 0.05
+    signScale = stats.norm.ppf(1 - signLvl / 2)
+    N_raw = len(original)
+    condInt = signScale / np.sqrt(N_raw)
+    condInt_vec = condInt * np.ones_like(lags_raw)
+    ax.plot(lags_raw, condInt_vec, "--", color="red", linewidth=0.8)
+    ax.plot(lags_raw, -condInt_vec, "--", color="red", linewidth=0.8)
+    # Fixed y-limits requested by user
+    ax.set_ylim(-0.50, 1.10)
+    # Caption in top-right corner explaining lines
+    caption = "Dashed red: 95% Confidence Interval"
+    ax.text(
+        0.98,
+        0.98,
+        caption,
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=8,
+        bbox=dict(facecolor="white", alpha=0.7, edgecolor="none"),
+    )
+
     # Bottom-left: filtered series
     ax = axes[1, 0]
     ax.plot(filtered, color="C0", linewidth=0.8)
@@ -98,6 +121,28 @@ def plot_q21(original, filtered, acf_raw, acf_filt):
     ax.axhline(0, color="grey", linewidth=0.8)
     ax.grid(True)
 
+    # Confidence interval (dashed lines) from `acf.py` styling
+    signScale = stats.norm.ppf(1 - signLvl / 2)
+    N_filt = len(filtered)
+    condInt_f = signScale / np.sqrt(N_filt)
+    condInt_vec_f = condInt_f * np.ones_like(lags_filt)
+    ax.plot(lags_filt, condInt_vec_f, "--", color="red", linewidth=0.8)
+    ax.plot(lags_filt, -condInt_vec_f, "--", color="red", linewidth=0.8)
+    # Fixed y-limits requested by user
+    ax.set_ylim(-0.50, 1.10)
+    # Caption in top-right corner explaining lines
+    caption = "Dashed red: 95% Confidence Interval"
+    ax.text(
+        0.98,
+        0.98,
+        caption,
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=8,
+        bbox=dict(facecolor="white", alpha=0.7, edgecolor="none"),
+    )
+
     fig.tight_layout()
     plt.show()
 
@@ -109,7 +154,7 @@ def plot_kalman_results(Xtt, Atrue, ft_hat):
 
     plt.style.use("ggplot")
 
-    # ---- a1(t) and a2(t) vs true ----
+    # a1(t) and a2(t) vs true
     plt.figure(figsize=(12, 6))
 
     # a1(t)
@@ -135,7 +180,7 @@ def plot_kalman_results(Xtt, Atrue, ft_hat):
     plt.tight_layout()
     plt.show()
 
-    # ---- residuals over time ----
+    # residuals over time
     plt.figure(figsize=(10, 4))
     plt.plot(np.arange(len(ft_hat)), ft_hat, color="C2", linewidth=0.8)
     plt.xlabel("Time (hours)")
@@ -145,8 +190,9 @@ def plot_kalman_results(Xtt, Atrue, ft_hat):
     plt.tight_layout()
     plt.show()
 
-    # ---- ACF of residuals (for whiteness check) ----
-    ACF_res = acf(ft_hat, 200)
+    # ACF of residuals (for whiteness check)
+    # compute ACF without plotting inside acf()
+    ACF_res = acf(ft_hat, 200, plotIt=False)
     lags_res = np.arange(len(ACF_res))
 
     plt.figure(figsize=(8, 3))
@@ -164,13 +210,52 @@ def plot_kalman_results(Xtt, Atrue, ft_hat):
     plt.xlabel("Lag (hours)")
     plt.ylabel("Autocorrelation")
     plt.title("ACF of residuals")
+    signLvl = 0.05
+    signScale = stats.norm.ppf(1 - signLvl / 2)
+    N_res = len(ft_hat)
+    condInt = signScale / np.sqrt(N_res)
+    condInt_vec = condInt * np.ones_like(lags_res)
+    plt.plot(lags_res, condInt_vec, "--", color="red", linewidth=0.8)
+    plt.plot(lags_res, -condInt_vec, "--", color="red", linewidth=0.8)
+    ax = plt.gca()
+    caption = "Dashed red: 95% Confidence Interval"
+    ax.text(
+        0.98,
+        0.98,
+        caption,
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=8,
+        bbox=dict(facecolor="white", alpha=0.7, edgecolor="none"),
+    )
     plt.grid(True)
     plt.tight_layout()
     plt.show()
 
     # fhat is your residual vector
-    stats.probplot(ACF_res, dist="norm", plot=plt)
+    # Create a styled normal probability (QQ) plot consistent with other figures
+    (osm, osr), (slope, intercept, r) = stats.probplot(ACF_res, dist="norm", plot=None)
+    plt.figure(figsize=(8, 3))
+    plt.plot(
+        osm,
+        osr,
+        marker="o",
+        markersize=3,
+        markerfacecolor="none",
+        markeredgecolor="C1",
+        linestyle="None",
+        color="C1",
+    )
+    # Fit line
+    line_x = np.array([np.min(osm), np.max(osm)])
+    line_y = slope * line_x + intercept
+    plt.plot(line_x, line_y, color="C2", linewidth=0.8)
+    plt.xlabel("Theoretical quantiles")
+    plt.ylabel("Sample quantiles")
     plt.title("Normal Probability Plot")
+    plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
 
@@ -193,7 +278,7 @@ if __name__ == "__main__":
     Atrue, svedala_rec = extract_data(data)
 
     # ACF of original series
-    ACF_raw = acf(svedala_rec, 999)
+    ACF_raw = acf(svedala_rec, 999, plotIt=False)
     print("Length of original series:", len(svedala_rec))
     print("Length of ACF_raw:", len(ACF_raw))
 
@@ -201,7 +286,7 @@ if __name__ == "__main__":
     filtered_svedala = apply_seasonal_filter(svedala_rec, 24)
 
     # ACF of filtered series
-    ACF_filt = acf(filtered_svedala, 999)
+    ACF_filt = acf(filtered_svedala, 999, plotIt=False)
 
     # Plots for Q2.1 (original + filtered + both ACFs)
     plot_q21(
