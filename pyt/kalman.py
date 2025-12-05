@@ -1,8 +1,8 @@
 import numpy as np
 
 
-def kalman(y, se2=0.000003, sf2=0.1, lag=2):
-    """
+def kalman(y, se2=0.01, sf2=0.1, lag=2):
+    """ 
     Kalman filter for a time-varying AR(2) model.
 
     y   : observed series Y_t

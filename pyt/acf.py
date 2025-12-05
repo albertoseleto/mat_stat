@@ -3,7 +3,7 @@ from scipy.stats import norm
 from scipy.signal import correlate
 import matplotlib.pyplot as plt
 
-def acf(y, maxOrd, signLvl=0.05, plotIt=False, maOrder=0, includeZeroLag=True):
+def acf(y, maxOrd, signLvl=0.05, plotIt=True, maOrder=0, includeZeroLag=True):
     """
     Python version of the MATLAB ACF estimator.
 
@@ -66,7 +66,12 @@ def acf(y, maxOrd, signLvl=0.05, plotIt=False, maOrder=0, includeZeroLag=True):
             max_range = np.max(np.abs(rho_plot)) * 1.2
             start_lag = 1
 
-        plt.stem(range_lags, rho_plot, use_line_collection=True)
+        markerline, stemlines, baseline = plt.stem(range_lags, rho_plot)
+
+        markerline.set_markersize(4)  # smaller dots
+        markerline.set_linestyle('None')  # only dots
+        markerline.set_marker('.')
+        plt.title('acf plot')
         plt.xlabel("Lag")
         plt.ylabel("Amplitude")
 

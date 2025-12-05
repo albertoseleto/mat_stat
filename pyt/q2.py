@@ -4,6 +4,7 @@ from scipy import signal as sig
 
 from acf import acf
 from kalman import kalman
+import scipy.stats as stats
 
 
 def load_mat_simple(path):
@@ -167,6 +168,11 @@ def plot_kalman_results(Xtt, Atrue, ft_hat):
     plt.tight_layout()
     plt.show()
 
+    # fhat is your residual vector
+    stats.probplot(ACF_res, dist="norm", plot=plt)
+    plt.title("Normal Probability Plot")
+    plt.show()
+
 
 def apply_seasonal_filter(data, s):
     """
@@ -187,7 +193,7 @@ if __name__ == "__main__":
     Atrue, svedala_rec = extract_data(data)
 
     # ACF of original series
-    ACF_raw = acf(svedala_rec, 690)
+    ACF_raw = acf(svedala_rec, 999)
     print("Length of original series:", len(svedala_rec))
     print("Length of ACF_raw:", len(ACF_raw))
 
@@ -195,7 +201,7 @@ if __name__ == "__main__":
     filtered_svedala = apply_seasonal_filter(svedala_rec, 24)
 
     # ACF of filtered series
-    ACF_filt = acf(filtered_svedala, 690)
+    ACF_filt = acf(filtered_svedala, 999)
 
     # Plots for Q2.1 (original + filtered + both ACFs)
     plot_q21(
@@ -206,5 +212,5 @@ if __name__ == "__main__":
     )
 
     # Kalman filter for Q2.2 / Q2.3
-    Xtt, Ytt1, ft_hat = kalman(filtered_svedala, se2=1e-4, sf2=1.0)
+    Xtt, Ytt1, ft_hat = kalman(filtered_svedala, se2=8e-3, sf2=85)
     plot_kalman_results(Xtt, Atrue, ft_hat)
