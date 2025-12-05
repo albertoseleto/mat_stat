@@ -172,3 +172,20 @@ if __name__ == "__main__":
     plot_spectrum(
         freq_trombone, psd_trombone, freq_trombone_filtered, psd_trmbone_filtered
     )
+
+    # Question 1.4
+    print("\nPlaying ORIGINAL cello...")
+    sd.play(cello, int(1 / dt_cello))
+    sd.wait()
+
+    print("Playing FILTERED cello...")
+    sd.play(cello_filtered, int(1 / dt_cello))
+    sd.wait()
+
+    print("\nPlaying ORIGINAL trombone...")
+    sd.play(trombone, int(1 / dt_trombone))
+    sd.wait()
+
+    print("Playing FILTERED trombone...")
+    sd.play(trombone_filtered, int(1 / dt_trombone))
+    sd.wait()
