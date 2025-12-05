@@ -1,7 +1,8 @@
-import numpy as np
-from scipy.stats import norm
-from scipy.signal import correlate
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy.signal import correlate
+from scipy.stats import norm
+
 
 def acf(y, maxOrd, signLvl=0.05, plotIt=True, maOrder=0, includeZeroLag=True):
     """
@@ -48,7 +49,7 @@ def acf(y, maxOrd, signLvl=0.05, plotIt=True, maOrder=0, includeZeroLag=True):
 
     # Keep only lags [0:maxOrd]
     mid = len(rho_full) // 2
-    rho = rho_full[mid:mid + maxOrd + 1]
+    rho = rho_full[mid : mid + maxOrd + 1]
 
     # Normalize like MATLAB: rho/max(rho)
     rho = rho / np.max(rho)
@@ -69,22 +70,22 @@ def acf(y, maxOrd, signLvl=0.05, plotIt=True, maOrder=0, includeZeroLag=True):
         markerline, stemlines, baseline = plt.stem(range_lags, rho_plot)
 
         markerline.set_markersize(4)  # smaller dots
-        markerline.set_linestyle('None')  # only dots
-        markerline.set_marker('.')
-        plt.title('acf plot')
+        markerline.set_linestyle("None")  # only dots
+        markerline.set_marker(".")
+        plt.title("acf plot")
         plt.xlabel("Lag")
         plt.ylabel("Amplitude")
 
         # Confidence interval
         condInt = signScale / np.sqrt(N)
-        condInt *= np.sqrt(1 + 2 * np.sum(rho[:maOrder]**2))
+        condInt *= np.sqrt(1 + 2 * np.sum(rho[:maOrder] ** 2))
         condInt_vec = condInt * np.ones_like(range_lags)
 
         plt.plot(range_lags, condInt_vec, "--")
         plt.plot(range_lags, -condInt_vec, "--")
 
         if (not includeZeroLag) and max_range < condInt:
-            plt.axis([start_lag, maxOrd, -condInt*1.2, condInt*1.2])
+            plt.axis([start_lag, maxOrd, -condInt * 1.2, condInt * 1.2])
         else:
             plt.axis([start_lag, maxOrd, -max_range, max_range])
 
